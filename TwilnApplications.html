@@ -1,257 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Twiln Application Hub</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Twiln | Applications</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
 
-<style>
-* {
-    box-sizing: border-box;
-    font-family: "Segoe UI", sans-serif;
-}
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #020617;
+            background: radial-gradient(circle at top right, #1e1b4b, #020617);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #f8fafc;
+            margin: 0;
+            padding-bottom: 5rem;
+        }
 
-body {
-    margin: 0;
-    background: linear-gradient(135deg, #0f172a, #020617);
-    color: white;
-}
+        .cyber-header {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #ffffff 30%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
+        }
 
-/* HEADER */
-header {
-    padding: 30px;
-    text-align: center;
-    font-size: 32px;
-    font-weight: bold;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
+        }
 
-/* CONTAINER */
-.container {
-    max-width: 900px;
-    margin: auto;
-    padding: 20px;
-}
+        input, textarea {
+            background: rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            border-radius: 1.25rem;
+            padding: 1.25rem 1.5rem !important;
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
 
-/* CARDS */
-.card {
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(12px);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255,255,255,0.08);
-}
+        input:focus, textarea:focus {
+            border-color: #3b82f6 !important;
+            background: rgba(0, 0, 0, 0.6) !important;
+        }
 
-/* BUTTONS */
-button {
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
-    border: none;
-    padding: 10px 16px;
-    color: white;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 10px;
-}
+        .btn-neon {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            transition: all 0.3s;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: white;
+            padding: 1.25rem;
+        }
 
-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
+        .btn-neon:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
 
-/* INPUTS */
-textarea {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    margin-top: 6px;
-    margin-bottom: 15px;
-    background: rgba(0,0,0,0.4);
-    color: white;
-}
+        .btn-neon:disabled {
+            background: #1e293b;
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
 
-label {
-    font-size: 14px;
-    opacity: 0.8;
-}
-
-.hidden {
-    display: none;
-}
-
-.status {
-    font-size: 13px;
-    opacity: 0.7;
-}
-
-#loginMsg {
-    text-align: center;
-    margin-top: 10px;
-    opacity: 0.8;
-}
-</style>
+        .hidden { display: none; }
+    </style>
 </head>
+<body class="p-6 md:p-12">
 
-<body>
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-16">
+            <h1 class="cyber-header text-6xl md:text-7xl font-black mb-4">TWILN</h1>
+            <p class="text-blue-400 font-bold tracking-[0.4em] uppercase text-xs">Application Hub</p>
+        </header>
 
-<header>Twiln Application Hub</header>
+        <div id="appList" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
 
-<div class="container">
-
-    <!-- LOGIN -->
-    <div class="card">
-        <h3>Login</h3>
-        <button onclick="loginDiscord()">Login with Discord</button>
-        <p id="loginMsg"></p>
-    </div>
-
-    <!-- APPS -->
-    <div id="appList"></div>
-
-    <!-- FORM -->
-    <div class="card hidden" id="formBox">
-        <h3 id="formTitle"></h3>
-        <form id="form"></form>
-        <button onclick="submitApp()">Submit</button>
-        <button onclick="closeForm()">Back</button>
-    </div>
-
-</div>
-
-<script>
-
-// ================= CONFIG =================
-const applications = {
-    partnership: {
-        name: "Partnership Application",
-        webhook: "PASTE_WEBHOOK_1",
-        enabled: true,
-        questions: [
-            "Server Name",
-            "Member Count",
-            "Why partner?"
-        ]
-    },
-
-    staff: {
-        name: "Support Staff Application",
-        webhook: "PASTE_WEBHOOK_2",
-        enabled: true,
-        questions: [
-            "Username",
-            "Age",
-            "Experience",
-            "Why should we pick you?"
-        ]
-    }
-};
-// ==========================================
-
-// DISCORD LOGIN
-const CLIENT_ID = "YOUR_CLIENT_ID";
-const REDIRECT_URI = "https://YOUR-BACKEND.onrender.com/callback";
-
-function loginDiscord() {
-    window.location.href =
-    `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
-}
-
-// GET USER FROM URL
-const params = new URLSearchParams(window.location.search);
-const username = params.get("user");
-const userid = params.get("id");
-
-let loggedIn = username && userid;
-
-if (!loggedIn) {
-    document.getElementById("loginMsg").innerText =
-    "You must login with Discord to apply.";
-}
-
-// LOAD APPS
-function loadApps() {
-    const list = document.getElementById("appList");
-    list.innerHTML = "";
-
-    for (let key in applications) {
-        const app = applications[key];
-
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-            <h3>${app.name}</h3>
-            <div class="status">🟢 Open</div>
-            <button onclick="openForm('${key}')" ${!loggedIn ? "disabled" : ""}>
-                Apply
+        <div id="formBox" class="hidden glass-card rounded-[2.5rem] p-8 md:p-14">
+            <button onclick="closeForm()" class="mb-10 text-slate-500 hover:text-white font-bold uppercase text-xs tracking-widest transition-all">
+                ← Back to Menu
             </button>
-        `;
+            <h2 id="formTitle" class="cyber-header text-4xl mb-12"></h2>
+            
+            <div class="space-y-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10 border-b border-white/10">
+                    <div class="flex flex-col">
+                        <label class="text-xs font-black text-blue-500 uppercase tracking-widest ml-2">Discord Username</label>
+                        <input type="text" id="userName" placeholder="e.g. twiln_user">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-xs font-black text-blue-500 uppercase tracking-widest ml-2">Discord User ID</label>
+                        <input type="text" id="userId" placeholder="e.g. 1500069502963028079">
+                    </div>
+                </div>
+                <div id="dynamicQuestions" class="space-y-10"></div>
+            </div>
 
-        list.appendChild(card);
-    }
-}
+            <button id="subBtn" onclick="submitApp()" class="btn-neon w-full mt-16 rounded-2xl text-lg shadow-2xl">
+                Submit Application
+            </button>
+        </div>
+    </div>
 
-let currentApp = null;
+    <script>
+        const CONFIG = {
+            staff: {
+                name: "Staff Application",
+                webhook: "https://discord.com/api/webhooks/1500066175495835658/9xEGwhHL-hD14-H24DhV84HfjqYzuHmbUllKMsH_QHZOXNTY3kialvWyYmQOYsFdD4ci",
+                isOpen: false,
+                closeDate: "None", // Format: D/M YYYY HAM/PM (AEST)
+                questions: ["Are you above the age of 13?", "What is your Timezone?", "Why do you want to join Twiln?", "Describe your experience."]
+            },
+            partner: {
+                name: "Partnership Application",
+                webhook: "https://discord.com/api/webhooks/1500083061021474847/sFF82nc0tEQt1YUKAECCHD653Xs8PrukPXgeZ783OI_EJosYqQRcYoAQPsejarK8FTv9",
+                isOpen: true,
+                closeDate: "None",
+                questions: ["Server/Brand Name?", "Invite Link?", "Total Member Count?", "Proposed Terms?"]
+            }
+        };
 
-// OPEN FORM
-function openForm(key) {
-    currentApp = applications[key];
+        function parseAEST(dateStr) {
+            if (dateStr === "None") return null;
+            // Parses "5/5 2026 5AM"
+            const match = dateStr.match(/(\d+)\/(\d+)\s+(\d+)\s+(\d+)(AM|PM)/);
+            if (!match) return null;
 
-    document.getElementById("appList").classList.add("hidden");
-    document.getElementById("formBox").classList.remove("hidden");
+            let [_, day, month, year, hour, ampm] = match;
+            hour = parseInt(hour);
+            if (ampm === "PM" && hour < 12) hour += 12;
+            if (ampm === "AM" && hour === 12) hour = 0;
 
-    document.getElementById("formTitle").innerText = currentApp.name;
+            // Create date in AEST (UTC+10)
+            const date = new Date(Date.UTC(year, month - 1, day, hour - 10, 0, 0));
+            return date;
+        }
 
-    const form = document.getElementById("form");
-    form.innerHTML = "";
+        function initHub() {
+            const list = document.getElementById('appList');
+            list.innerHTML = "";
 
-    currentApp.questions.forEach((q, i) => {
-        form.innerHTML += `
-            <label>${q}</label>
-            <textarea id="q${i}" required></textarea>
-        `;
-    });
-}
+            Object.keys(CONFIG).forEach(key => {
+                const app = CONFIG[key];
+                const deadline = parseAEST(app.closeDate);
+                const now = new Date();
+                
+                let isExpired = deadline ? now > deadline : false;
+                let active = app.isOpen && !isExpired;
 
-// CLOSE FORM
-function closeForm() {
-    document.getElementById("appList").classList.remove("hidden");
-    document.getElementById("formBox").classList.add("hidden");
-}
+                const card = document.createElement('div');
+                card.className = "glass-card p-12 rounded-[2.5rem] flex flex-col items-center gap-8";
+                card.innerHTML = `
+                    <h3 class="cyber-header text-2xl text-center">${app.name}</h3>
+                    <button onclick="openForm('${key}')" ${!active ? 'disabled' : ''} class="btn-neon w-full rounded-2xl">
+                        ${active ? 'Apply Now' : 'Closed'}
+                    </button>
+                    ${deadline && active ? `<p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest text-center">Closes: ${deadline.toLocaleString()}</p>` : ''}
+                `;
+                list.appendChild(card);
+            });
+        }
 
-// SUBMIT
-async function submitApp() {
+        let currentAppKey = null;
 
-    let desc = `User: ${username} (${userid})\n\n`;
+        function openForm(key) {
+            currentAppKey = key;
+            const app = CONFIG[key];
+            document.getElementById('appList').classList.add('hidden');
+            document.getElementById('formBox').classList.remove('hidden');
+            document.getElementById('formTitle').innerText = app.name;
+            document.getElementById('dynamicQuestions').innerHTML = app.questions.map((q, i) => `
+                <div class="flex flex-col">
+                    <label class="text-xs font-black text-blue-500 uppercase tracking-widest ml-2">${q}</label>
+                    <textarea id="ans${i}" rows="4" placeholder="Your answer..."></textarea>
+                </div>`).join('');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-    currentApp.questions.forEach((q, i) => {
-        const ans = document.getElementById(`q${i}`).value;
+        function closeForm() {
+            document.getElementById('appList').classList.remove('hidden');
+            document.getElementById('formBox').classList.add('hidden');
+        }
 
-        desc += `***${q}***\n${ans}\n\n──────────────\n`;
-    });
+        async function submitApp() {
+            const user = document.getElementById('userName').value.trim();
+            const id = document.getElementById('userId').value.trim();
+            const app = CONFIG[currentAppKey];
+            const answers = app.questions.map((_, i) => document.getElementById(`ans${i}`).value.trim());
 
-    const embed = {
-        title: currentApp.name,
-        description: desc,
-        color: 5814783
-    };
+            if (!user || !id || answers.some(a => !a)) return alert("Please fill in all fields.");
 
-    await fetch(currentApp.webhook, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ embeds: [embed] })
-    });
+            const btn = document.getElementById('subBtn');
+            btn.disabled = true;
+            btn.innerText = "Sending...";
 
-    alert("Submitted!");
-    location.reload();
-}
+            try {
+                await fetch(app.webhook, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        embeds: [{
+                            title: `NEW APPLICATION: ${app.name.toUpperCase()}`,
+                            color: 3447003,
+                            fields: [
+                                { name: "Applicant", value: `**${user}** (${id})` },
+                                ...app.questions.map((q, i) => ({ name: q, value: answers[i] }))
+                            ],
+                            timestamp: new Date()
+                        }]
+                    })
+                });
+                alert("Success! Your response has been collected.");
+                window.location.reload();
+            } catch (err) {
+                alert("Error sending. Please try again.");
+                btn.disabled = false;
+                btn.innerText = "Submit Application";
+            }
+        }
 
-loadApps();
-
-</script>
-
+        initHub();
+    </script>
 </body>
 </html>
