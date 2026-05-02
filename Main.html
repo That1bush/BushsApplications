@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Twiln Application Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color: white;
+}
+
+/* HEADER */
+header {
+    padding: 30px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* CONTAINER */
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* CARDS */
+.card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: 0.2s;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+/* BUTTONS */
+button {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    border: none;
+    padding: 10px 16px;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* FORM */
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 6px;
+    margin-bottom: 15px;
+    background: rgba(0,0,0,0.4);
+    color: white;
+}
+
+label {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.hidden {
+    display: none;
+}
+
+/* STATUS */
+.status {
+    font-size: 13px;
+    margin-bottom: 10px;
+    opacity: 0.7;
+}
+
+/* BACK BUTTON */
+.backBtn {
+    background: #334155;
+    margin-left: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>Twiln Application Hub</header>
+
+<div class="container" id="appList"></div>
+
+<div class="container hidden" id="formContainer">
+    <div class="card">
+        <h2 id="formTitle"></h2>
+        <form id="applicationForm"></form>
+        <button onclick="submitForm()">Submit</button>
+        <button class="backBtn" onclick="goBack()">Back</button>
+    </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const applications = {
+    partnership: {
+        name: "Partnership Application",
+        webhook: "PASTE_WEBHOOK",
+        enabled: true,
+        closesAt: null,
+        questions: [
+            "Server Name",
+            "Member Count",
+            "Why do you want to partner?"
+        ]
+    },
+
+    staff: {
+        name: "Support Staff Application",
+        webhook: "PASTE_WEBHOOK",
+        enabled: true,
+        closesAt: null,
+        questions: [
+            "Username",
+            "Age",
+            "Experience",
+            "Why should we pick you?"
+        ]
+    }
+};
+// ==================
+
+let currentApp = null;
+
+function loadApps() {
+    const container = document.getElementById("appList");
+    container.innerHTML = "";
+
+    for (let key in applications) {
+        const app = applications[key];
+        const isClosed = app.closesAt && Date.now() > app.closesAt;
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+            <h3>${app.name}</h3>
+            <div class="status">
+                ${(!app.enabled || isClosed) ? "🔒 Closed" : "🟢 Open"}
+            </div>
+            <button ${(!app.enabled || isClosed) ? "disabled" : ""} onclick="openForm('${key}')">
+                Apply Now
+            </button>
+        `;
+
+        container.appendChild(card);
+    }
+}
+
+function openForm(key) {
+    currentApp = applications[key];
+
+    document.getElementById("appList").classList.add("hidden");
+    document.getElementById("formContainer").classList.remove("hidden");
+
+    document.getElementById("formTitle").innerText = currentApp.name;
+
+    const form = document.getElementById("applicationForm");
+    form.innerHTML = "";
+
+    currentApp.questions.forEach((q, i) => {
+        form.innerHTML += `
+            <label>${q}</label>
+            <textarea required id="q${i}"></textarea>
+        `;
+    });
+}
+
+function goBack() {
+    document.getElementById("appList").classList.remove("hidden");
+    document.getElementById("formContainer").classList.add("hidden");
+}
+
+async function submitForm() {
+    let description = "";
+
+    currentApp.questions.forEach((q, i) => {
+        const answer = document.getElementById(`q${i}`).value;
+
+        description += `***${q}***\n${answer}\n\n`;
+        if (i !== currentApp.questions.length - 1) {
+            description += "──────────────\n";
+        }
+    });
+
+    const embed = {
+        title: currentApp.name,
+        description: description,
+        color: 5814783
+    };
+
+    await fetch(currentApp.webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ embeds: [embed] })
+    });
+
+    alert("Submitted!");
+    location.reload();
+}
+
+loadApps();
+</script>
+
+</body>
+</html>
