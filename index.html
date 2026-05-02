@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Twiln | Applications</title>
+    <title>BUSH | Applications</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -42,7 +42,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             color: white !important;
             border-radius: 1.25rem;
-            padding: 1.25rem 1.5rem !important; /* Fixed clipping with padding */
+            padding: 1.25rem 1.5rem !important;
             width: 100%;
             outline: none;
             transition: all 0.3s ease;
@@ -83,7 +83,7 @@
 
     <div class="max-w-4xl mx-auto">
         <header class="text-center mb-16">
-            <h1 class="cyber-header text-6xl md:text-7xl font-black mb-4">TWILN</h1>
+            <h1 class="cyber-header text-6xl md:text-7xl font-black mb-4">BUSH</h1>
             <p class="text-blue-400 font-bold tracking-[0.4em] uppercase text-xs">Application Hub</p>
         </header>
 
@@ -99,7 +99,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10 border-b border-white/10">
                     <div class="flex flex-col">
                         <label class="text-xs font-black text-blue-500 uppercase tracking-widest ml-2">Discord Username</label>
-                        <input type="text" id="userName" placeholder="e.g. twiln_user">
+                        <input type="text" id="userName" placeholder="e.g. bush_user">
                     </div>
                     <div class="flex flex-col">
                         <label class="text-xs font-black text-blue-500 uppercase tracking-widest ml-2">Discord User ID</label>
@@ -116,21 +116,17 @@
     </div>
 
     <script>
-        // Encoded Webhooks to prevent easy scraping
-        const SECRETS = {
-            staff: "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUwMDA2NjE3NTQ5NTgzNTY1OC85eEVnd2hITC1oRDE0LUgyNERoVjQ0RmhqcVl6dUhtYlVsbEtNc0hfUUhaT1hOVFkzS2lhbHZ3WVltUU9Zc0ZkRDRjaQ==",
-            partner: "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUwMDA4MzA2MTAyMTQ3NDg0Ny9zRkY4Mm5jMHRFUXQxWVVlQUVDQ0hENjUzWHM4UHJ1a1BYZ2VaNzgzT0lfRUpvc1lxUVJjWW9BUXBzZWphcktLRlR2OQ=="
-        };
-
         const CONFIG = {
             staff: {
                 name: "Staff Application",
-                isOpen: true,
-                closeDate: "5/5 2026 5AM", // AEST
+                webhook: "https://discord.com/api/webhooks/1500066175495835658/9xEGwhHL-hD14-H24DhV84HfjqYzuHmbUllKMsH_QHZOXNTY3kialvWyYmQOYsFdD4ci",
+                isOpen: false,
+                closeDate: "None", // Format: D/M YYYY HAM/PM (AEST)
                 questions: ["Are you above the age of 13?", "What is your Timezone?", "Why do you want to join Twiln?", "Describe your experience."]
             },
             partner: {
                 name: "Partnership Application",
+                webhook: "https://discord.com/api/webhooks/1500083061021474847/sFF82nc0tEQt1YUKAECCHD653Xs8PrukPXgeZ783OI_EJosYqQRcYoAQPsejarK8FTv9",
                 isOpen: true,
                 closeDate: "None",
                 questions: ["Server/Brand Name?", "Invite Link?", "Total Member Count?", "Proposed Terms?"]
@@ -138,7 +134,8 @@
         };
 
         function parseAEST(dateStr) {
-            if (!dateStr || dateStr === "None") return null;
+            if (dateStr === "None") return null;
+            // Parses "5/5 2026 5AM"
             const match = dateStr.match(/(\d+)\/(\d+)\s+(\d+)\s+(\d+)(AM|PM)/);
             if (!match) return null;
 
@@ -147,8 +144,9 @@
             if (ampm === "PM" && hour < 12) hour += 12;
             if (ampm === "AM" && hour === 12) hour = 0;
 
-            // Convert AEST (UTC+10) to UTC
-            return new Date(Date.UTC(year, month - 1, day, hour - 10, 0, 0));
+            // Create date in AEST (UTC+10)
+            const date = new Date(Date.UTC(year, month - 1, day, hour - 10, 0, 0));
+            return date;
         }
 
         function initHub() {
@@ -159,7 +157,9 @@
                 const app = CONFIG[key];
                 const deadline = parseAEST(app.closeDate);
                 const now = new Date();
-                const active = app.isOpen && (!deadline || now < deadline);
+                
+                let isExpired = deadline ? now > deadline : false;
+                let active = app.isOpen && !isExpired;
 
                 const card = document.createElement('div');
                 card.className = "glass-card p-12 rounded-[2.5rem] flex flex-col items-center gap-8";
@@ -168,7 +168,7 @@
                     <button onclick="openForm('${key}')" ${!active ? 'disabled' : ''} class="btn-neon w-full rounded-2xl">
                         ${active ? 'Apply Now' : 'Closed'}
                     </button>
-                    ${deadline && active ? `<p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest text-center">Local Close: ${deadline.toLocaleString()}</p>` : ''}
+                    ${deadline && active ? `<p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest text-center">Closes: ${deadline.toLocaleString()}</p>` : ''}
                 `;
                 list.appendChild(card);
             });
@@ -178,10 +178,11 @@
 
         function openForm(key) {
             currentAppKey = key;
+            const app = CONFIG[key];
             document.getElementById('appList').classList.add('hidden');
             document.getElementById('formBox').classList.remove('hidden');
-            document.getElementById('formTitle').innerText = CONFIG[key].name;
-            document.getElementById('dynamicQuestions').innerHTML = CONFIG[key].questions.map((q, i) => `
+            document.getElementById('formTitle').innerText = app.name;
+            document.getElementById('dynamicQuestions').innerHTML = app.questions.map((q, i) => `
                 <div class="flex flex-col">
                     <label class="text-xs font-black text-blue-500 uppercase tracking-widest ml-2">${q}</label>
                     <textarea id="ans${i}" rows="4" placeholder="Your answer..."></textarea>
@@ -207,10 +208,7 @@
             btn.innerText = "Sending...";
 
             try {
-                // Decode webhook on the fly
-                const hookUrl = atob(SECRETS[currentAppKey]);
-                
-                await fetch(hookUrl, {
+                await fetch(app.webhook, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -221,7 +219,6 @@
                                 { name: "Applicant", value: `**${user}** (${id})` },
                                 ...app.questions.map((q, i) => ({ name: q, value: answers[i] }))
                             ],
-                            footer: { text: "Twiln Application System" },
                             timestamp: new Date()
                         }]
                     })
@@ -229,7 +226,7 @@
                 alert("Success! Your response has been collected.");
                 window.location.reload();
             } catch (err) {
-                alert("Error sending. Please check your connection.");
+                alert("Error sending. Please try again.");
                 btn.disabled = false;
                 btn.innerText = "Submit Application";
             }
