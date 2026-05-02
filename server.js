@@ -2,8 +2,8 @@ const express = require("express");
 const fetch = require("node-fetch");
 const app = express();
 
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const CLIENT_ID = process.env.1500069502963028079;
+const CLIENT_SECRET = process.env.YD2qw5HOwzCXLoQWsm_8Ayern0q_O6pv;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 
 app.get("/", (req, res) => {
