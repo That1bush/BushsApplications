@@ -30,7 +30,7 @@ header {
 
 /* CONTAINER */
 .container {
-    max-width: 1000px;
+    max-width: 900px;
     margin: auto;
     padding: 20px;
 }
@@ -42,13 +42,7 @@ header {
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 20px;
-    transition: 0.2s;
     border: 1px solid rgba(255,255,255,0.08);
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 
 /* BUTTONS */
@@ -59,11 +53,7 @@ button {
     color: white;
     border-radius: 10px;
     cursor: pointer;
-    transition: 0.2s;
-}
-
-button:hover {
-    opacity: 0.85;
+    margin-top: 10px;
 }
 
 button:disabled {
@@ -71,8 +61,8 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* FORM */
-input, textarea {
+/* INPUTS */
+textarea {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
@@ -92,17 +82,15 @@ label {
     display: none;
 }
 
-/* STATUS */
 .status {
     font-size: 13px;
-    margin-bottom: 10px;
     opacity: 0.7;
 }
 
-/* BACK BUTTON */
-.backBtn {
-    background: #334155;
-    margin-left: 10px;
+#loginMsg {
+    text-align: center;
+    margin-top: 10px;
+    opacity: 0.8;
 }
 </style>
 </head>
@@ -111,37 +99,47 @@ label {
 
 <header>Twiln Application Hub</header>
 
-<div class="container" id="appList"></div>
+<div class="container">
 
-<div class="container hidden" id="formContainer">
+    <!-- LOGIN -->
     <div class="card">
-        <h2 id="formTitle"></h2>
-        <form id="applicationForm"></form>
-        <button onclick="submitForm()">Submit</button>
-        <button class="backBtn" onclick="goBack()">Back</button>
+        <h3>Login</h3>
+        <button onclick="loginDiscord()">Login with Discord</button>
+        <p id="loginMsg"></p>
     </div>
+
+    <!-- APPS -->
+    <div id="appList"></div>
+
+    <!-- FORM -->
+    <div class="card hidden" id="formBox">
+        <h3 id="formTitle"></h3>
+        <form id="form"></form>
+        <button onclick="submitApp()">Submit</button>
+        <button onclick="closeForm()">Back</button>
+    </div>
+
 </div>
 
 <script>
-// ===== CONFIG =====
+
+// ================= CONFIG =================
 const applications = {
     partnership: {
         name: "Partnership Application",
-        webhook: "PASTE_WEBHOOK",
+        webhook: "PASTE_WEBHOOK_1",
         enabled: true,
-        closesAt: null,
         questions: [
             "Server Name",
             "Member Count",
-            "Why do you want to partner?"
+            "Why partner?"
         ]
     },
 
     staff: {
         name: "Support Staff Application",
-        webhook: "PASTE_WEBHOOK",
+        webhook: "PASTE_WEBHOOK_2",
         enabled: true,
-        closesAt: null,
         questions: [
             "Username",
             "Age",
@@ -150,80 +148,100 @@ const applications = {
         ]
     }
 };
-// ==================
+// ==========================================
 
-let currentApp = null;
+// DISCORD LOGIN
+const CLIENT_ID = "YOUR_CLIENT_ID";
+const REDIRECT_URI = "https://YOUR-BACKEND.onrender.com/callback";
 
+function loginDiscord() {
+    window.location.href =
+    `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
+}
+
+// GET USER FROM URL
+const params = new URLSearchParams(window.location.search);
+const username = params.get("user");
+const userid = params.get("id");
+
+let loggedIn = username && userid;
+
+if (!loggedIn) {
+    document.getElementById("loginMsg").innerText =
+    "You must login with Discord to apply.";
+}
+
+// LOAD APPS
 function loadApps() {
-    const container = document.getElementById("appList");
-    container.innerHTML = "";
+    const list = document.getElementById("appList");
+    list.innerHTML = "";
 
     for (let key in applications) {
         const app = applications[key];
-        const isClosed = app.closesAt && Date.now() > app.closesAt;
 
         const card = document.createElement("div");
         card.className = "card";
 
         card.innerHTML = `
             <h3>${app.name}</h3>
-            <div class="status">
-                ${(!app.enabled || isClosed) ? "🔒 Closed" : "🟢 Open"}
-            </div>
-            <button ${(!app.enabled || isClosed) ? "disabled" : ""} onclick="openForm('${key}')">
-                Apply Now
+            <div class="status">🟢 Open</div>
+            <button onclick="openForm('${key}')" ${!loggedIn ? "disabled" : ""}>
+                Apply
             </button>
         `;
 
-        container.appendChild(card);
+        list.appendChild(card);
     }
 }
 
+let currentApp = null;
+
+// OPEN FORM
 function openForm(key) {
     currentApp = applications[key];
 
     document.getElementById("appList").classList.add("hidden");
-    document.getElementById("formContainer").classList.remove("hidden");
+    document.getElementById("formBox").classList.remove("hidden");
 
     document.getElementById("formTitle").innerText = currentApp.name;
 
-    const form = document.getElementById("applicationForm");
+    const form = document.getElementById("form");
     form.innerHTML = "";
 
     currentApp.questions.forEach((q, i) => {
         form.innerHTML += `
             <label>${q}</label>
-            <textarea required id="q${i}"></textarea>
+            <textarea id="q${i}" required></textarea>
         `;
     });
 }
 
-function goBack() {
+// CLOSE FORM
+function closeForm() {
     document.getElementById("appList").classList.remove("hidden");
-    document.getElementById("formContainer").classList.add("hidden");
+    document.getElementById("formBox").classList.add("hidden");
 }
 
-async function submitForm() {
-    let description = "";
+// SUBMIT
+async function submitApp() {
+
+    let desc = `User: ${username} (${userid})\n\n`;
 
     currentApp.questions.forEach((q, i) => {
-        const answer = document.getElementById(`q${i}`).value;
+        const ans = document.getElementById(`q${i}`).value;
 
-        description += `***${q}***\n${answer}\n\n`;
-        if (i !== currentApp.questions.length - 1) {
-            description += "──────────────\n";
-        }
+        desc += `***${q}***\n${ans}\n\n──────────────\n`;
     });
 
     const embed = {
         title: currentApp.name,
-        description: description,
+        description: desc,
         color: 5814783
     };
 
     await fetch(currentApp.webhook, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ embeds: [embed] })
     });
 
@@ -232,6 +250,7 @@ async function submitForm() {
 }
 
 loadApps();
+
 </script>
 
 </body>
